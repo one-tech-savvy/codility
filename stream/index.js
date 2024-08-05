@@ -1,10 +1,12 @@
 const { Readable, Transform } = require('stream');
-const signal = require('signal'); // Assuming this is imported correctly
+// const signal = require('signal'); // Assuming this is imported correctly
 
 function createReadableStream(data) {
     let seenChars = new Set();
     const readable = new Readable({
-        read() {} // No-op
+        read() {
+
+        } // No-op
     });
 
     // Push initial data into the stream
@@ -13,9 +15,9 @@ function createReadableStream(data) {
     readable.on('data', (char) => {
         const charStr = char.toString();
         if (seenChars.has(charStr)) {
-            signal('duplicate', charStr);
+            console.log(`signal('duplicate', ${charStr})`);
         } else {
-            signal('received', charStr);
+            console.log(`signal('received', ${charStr})`);
             seenChars.add(charStr);
         }
     });
@@ -23,16 +25,44 @@ function createReadableStream(data) {
     return readable;
 }
 
+// function createReadableStream(data) {
+//     let seenChars = new Set();
+//     let index = 0;
+
+//     const readable = new Readable({
+//         read() {
+//             if (index < data.length) {
+//                 const char = data.charAt(index++);
+//                 if (seenChars.has(char)) {
+//                     console.log(`signal('duplicate', ${char})`);
+
+//                     // signal('duplicate', char);
+//                 } else {
+//                     // signal('received', char);
+//                     console.log(`signal('received', ${char})`);
+
+//                     seenChars.add(char);
+//                 }
+//                 this.push(char);
+//             } else {
+//                 this.push(null);
+//             }
+//         }
+//     });
+
+//     return readable;
+// }
+
 function createTransformStream() {
     return new Transform({
         transform(chunk, encoding, callback) {
             const char = chunk.toString();
             if (/[a-zA-Z]/.test(char)) {
                 const upperChar = char.toUpperCase();
-                signal('transform', upperChar);
+                console.log(`signal('transform', ${upperChar})`);
                 callback(null, upperChar);
             } else {
-                signal('invalid', char);
+                console.log(`signal('invalid', ${char})`);
                 callback();
             }
         }
@@ -56,7 +86,7 @@ readable.push('A');
 
 const { readableStream, transformStream } = createStreamablePipeline('abc');
 readableStream.push('a');
-transformStream.push('1');
+readableStream.push('1');
 
 
 // const { Readable, Transform } = require('stream');
